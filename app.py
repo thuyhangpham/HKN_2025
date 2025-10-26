@@ -20,9 +20,6 @@ def load_data_and_model():
         response.raise_for_status() 
 
         df = pd.read_csv(io.BytesIO(response.content))
-        st.success("Đã tải và đọc dữ liệu thành công!")
-
-
 
     except requests.exceptions.RequestException as e:
         st.error(f"LỖI TẢI TỆP (Requests): Không thể tải dữ liệu từ Google Drive.")
@@ -115,4 +112,5 @@ if df is not None and similarity_matrix is not None:
     
     # Hiển thị kết quả dưới dạng bảng
     st.dataframe(df_recommend, use_container_width=True)
+
 

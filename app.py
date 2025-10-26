@@ -8,28 +8,29 @@ import io
 import os       
 
 # --- 1. Tải và xử lý dữ liệu ---
-
 @st.cache_data
+
 def load_data_and_model():
     file_id = '1IPXh27wrlhgdqx2GogVCpvxr5C1I7iNS'
-    url = f'https://drive.google.com/uc?export=download&id={file_id}'
+
+    download_url = f'https://drive.google.com/uc?export=download&id={file_id}'
     output = 'True_News.csv'
-
-    if not os.path.exists(output):
-        st.warning(f"Đang tải tệp {output} từ Google Drive... (chỉ tải lần đầu)")
-        try:
-            gdown.download(url, output, quiet=False)
-            st.success(f"Đã tải xong {output}!")
-        except Exception as e:
-            st.error(f"LỖI khi tải tệp: {e}")
-            return None, None
-
-
     try:
-        df = pd.read_csv(output) 
-    except FileNotFoundError:
-        st.error("LỖI: Không tìm thấy tệp 'True_News.csv'.")
-        st.error("Vui lòng tải tệp và đặt vào cùng thư mục với app.py")
+        response = requests.get(download_url)
+        response.raise_for_status() 
+
+        df = pd.read_csv(io.BytesIO(response.content))
+        st.success("Đã tải và đọc dữ liệu thành công!")
+
+
+
+    except requests.exceptions.RequestException as e:
+        st.error(f"LỖI TẢI TỆP (Requests): Không thể tải dữ liệu từ Google Drive.")
+        st.error("Vui lòng kiểm tra lại ID tệp hoặc quyền truy cập.")
+        return None, None
+
+    except Exception as e:
+        st.error(f"LỖI KHÁC: {e}")
         return None, None
 
     if 'Title' in df.columns:
@@ -114,3 +115,4 @@ if df is not None and similarity_matrix is not None:
     
     # Hiển thị kết quả dưới dạng bảng
     st.dataframe(df_recommend, use_container_width=True)
+
